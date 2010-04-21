@@ -14,7 +14,8 @@ namespace MongoDB.Driver
         private IComparer<string> keyComparer;
 
 
-        public Document() : this(null) {
+        public Document() : this(null)
+        {
         }
 
         public Document(IComparer<string> comparer) {
