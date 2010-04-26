@@ -49,6 +49,8 @@ namespace MongoDB.Driver
                 foreach (Document doc in docs.Documents) {
                     indexes.Add ((string)doc["name"], doc);
                 }
+
+                gotIndexes = true;
                 
                 return indexes;
             }

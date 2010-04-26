@@ -44,6 +44,17 @@ namespace MongoDB.Driver
         }
 
         [Test]
+        public void Should_ForEach_Indexes_Without_Needing_Local_Variable()
+        {
+            var cmd = DB["indextests"].MetaData;
+
+            foreach (var key in cmd.Indexes.Keys)
+            {
+                System.Console.WriteLine(String.Format("Key: {0} Value: {1}", key, cmd.Indexes[key]));
+            }
+        }
+
+        [Test]
         public void TestGetIndexes(){
             CollectionMetaData cmd = DB["indextests"].MetaData;
             Dictionary<string, Document> indexes = cmd.Indexes;
