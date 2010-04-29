@@ -7,6 +7,11 @@ namespace MongoDB.Driver
 	{
 		private IComparer<string> comparer;
 
+		public ComparerDocumentFactory()
+			: this(Comparer<string>.Default)
+		{
+		}
+
 		public ComparerDocumentFactory(IComparer<string> comparer)
 		{
 			this.comparer = comparer;
