@@ -33,8 +33,10 @@ namespace MongoDB.Driver
 
         public IList<string> Keys {
             get {
-                if(keyComparer != null && _dirty)
+                if(keyComparer != null && _dirty) {
                     orderedKeys.Sort(keyComparer);
+						  _dirty = false;
+					 }
                 return orderedKeys;
             }
         }
@@ -159,26 +161,33 @@ namespace MongoDB.Driver
 
         protected override void OnClear() {
             orderedKeys.Clear();
+				_dirty = true;
             base.OnClear();
         }
 
         protected override void OnInsertComplete(object key, object value) {
             string strKey = key as string;
-            if(!orderedKeys.Contains(strKey))
+            if(!orderedKeys.Contains(strKey)) {
                 orderedKeys.Add(strKey);
+                _dirty = true;
+				}
             base.OnInsertComplete(key, value);
         }
 
         protected override void OnRemoveComplete(object key, object value) {
             string strKey = key as string;
-            orderedKeys.Remove(strKey);
+            if (orderedKeys.Remove(strKey)) {
+                _dirty = true;
+				}
             base.OnRemoveComplete(key, value);
         }
 
         protected override void OnSetComplete(object key, object oldValue, object newValue) {
             string strKey = key as string;
-            if(!orderedKeys.Contains(strKey))
+            if(!orderedKeys.Contains(strKey)) {
                 orderedKeys.Add(strKey);
+                _dirty = true;
+				}
             base.OnSetComplete(key, oldValue, newValue);
         }
 
