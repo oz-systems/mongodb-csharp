@@ -146,6 +146,35 @@ namespace MongoDB.Driver.Bson
             
             Assert.IsTrue(thrown, "Shouldn't be able to write large document");
         }
-      
+        
+        [Test]
+        public void TestWriteSingle(){
+            string expected = "000000E0FFFFEF47";
+            MemoryStream ms = new MemoryStream();
+            BsonWriter writer = new BsonWriter(ms);
+            Single val = Single.MaxValue;
+            
+            writer.WriteValue(BsonDataType.Number, val);
+            
+            string hexdump = BitConverter.ToString(ms.ToArray());
+            hexdump = hexdump.Replace("-","");
+            Assert.AreEqual(expected, hexdump);
+            
+            
+        }
+        
+        [Test]
+        public void TestWriteSymbol(){
+            string expected = "0700000073796D626F6C00";
+                   
+            MemoryStream ms = new MemoryStream();
+            BsonWriter writer = new BsonWriter(ms);
+            MongoSymbol val = "symbol";
+            Assert.IsTrue(String.IsInterned(val) != null);
+            writer.WriteValue(BsonDataType.Symbol, val);
+            string hexdump = BitConverter.ToString(ms.ToArray()).Replace("-","");
+            
+            Assert.AreEqual(expected, hexdump);
+        }        
     }
 }

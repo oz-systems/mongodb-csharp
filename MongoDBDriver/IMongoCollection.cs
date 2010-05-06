@@ -15,6 +15,10 @@ namespace MongoDB.Driver
         ICursor Find (Document spec);
         ICursor Find (Document spec, int limit, int skip);
         ICursor Find (Document spec, int limit, int skip, Document fields);
+		Document FindAndModify(Document doc, Document spec);
+		Document FindAndModify(Document doc, Document spec, Document sort);
+		Document FindAndModify(Document doc, Document spec, bool returnNewDoc);
+		Document FindAndModify(Document doc, Document spec, Document sort, bool returnNewDoc);
         MapReduce MapReduce ();
         MapReduceBuilder MapReduceBuilder ();
         long Count ();
@@ -22,9 +26,10 @@ namespace MongoDB.Driver
         void Insert (Document doc);
         void Insert (Document doc, bool safemode);
         void Insert (IEnumerable<Document> docs);
-        void Insert (IEnumerable<Document> docs, bool safemode);        
+        void Insert (IEnumerable<Document> docs, bool safemode);
         void Delete (Document selector);
         void Delete (Document selector, bool safemode);
+        void Save(Document doc);
         void Update (Document doc);
         void Update (Document doc, Document selector);
         void Update (Document doc, Document selector, int upsert);

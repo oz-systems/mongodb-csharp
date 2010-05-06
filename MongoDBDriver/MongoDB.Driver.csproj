@@ -1,5 +1,5 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -50,11 +50,12 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Release</OutputPath>
+    <OutputPath>..\Release</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <GenerateDocumentation>true</GenerateDocumentation>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <CheckForOverflowUnderflow>False</CheckForOverflowUnderflow>
@@ -75,6 +76,9 @@
   <ItemGroup>
     <Compile Include="Bson\BsonDataType.cs" />
     <Compile Include="Bson\BsonInfo.cs" />
+    <Compile Include="ComparerDocumentFactory.cs" />
+    <Compile Include="DefaultDocumentFactory.cs" />
+    <Compile Include="IDocumentFactory.cs" />
     <Compile Include="Collection.cs" />
     <Compile Include="CollectionMetaData.cs" />
     <Compile Include="Connections\Connection.cs" />
@@ -99,7 +103,6 @@
     <Compile Include="Exceptions\MongoMapReduceException.cs" />
     <Compile Include="Exceptions\MongoOperationException.cs" />
     <Compile Include="ICursor.cs" />
-    <Compile Include="IDatabase.cs" />
     <Compile Include="IMongo.cs" />
     <Compile Include="IMongoCollection.cs" />
     <Compile Include="IndexOrder.cs" />
@@ -139,6 +142,8 @@
     <Compile Include="Configuration\MongoConfiguration.cs" />
     <Compile Include="Configuration\ConnectionElement.cs" />
     <Compile Include="Configuration\ConnectionCollection.cs" />
+    <Compile Include="MongoSymbol.cs" />
+    <Compile Include="IMongoDatabase.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

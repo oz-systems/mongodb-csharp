@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Text;
 
 namespace MongoDB.Driver.Bson
@@ -15,6 +14,7 @@ namespace MongoDB.Driver.Bson
         private Stream stream;
         private BinaryReader reader;
         private int position = 0;
+		private IDocumentFactory documentFactory;
 
         private byte[] _byteBuffer;
         private char[] _charBuffer;
@@ -26,9 +26,10 @@ namespace MongoDB.Driver.Bson
         private byte[] seqRange3 = new byte[]{224,239};//Range of 3-byte sequence
         private byte[] seqRange4 = new byte[]{240,244};//Range of 4-byte sequence
 
-        public BsonReader (Stream stream)
+        public BsonReader (IDocumentFactory documentFactory, Stream stream)
         {
-            this.stream = stream;
+			this.documentFactory = documentFactory;
+			this.stream = stream;
             reader = new BinaryReader (this.stream);
         }
 
@@ -45,7 +46,7 @@ namespace MongoDB.Driver.Bson
 
         public Document ReadDocument(){
             int startpos = position;
-            Document doc = new Document ();
+			Document doc = documentFactory.CreateDocument();
             int size = reader.ReadInt32 ();
             position += 4;
             while ((position - startpos) + 1 < size) {
@@ -100,6 +101,9 @@ namespace MongoDB.Driver.Bson
             case BsonDataType.String:{
                 return ReadLenString ();
             }
+            case BsonDataType.Symbol:{
+                return new MongoSymbol(ReadLenString());
+            }
             case BsonDataType.Obj:{
                 Document doc = this.ReadDocument();
                 if(DBRef.IsDocumentDBRef(doc)){
@@ -107,7 +111,6 @@ namespace MongoDB.Driver.Bson
                 }
                 return doc;
             }
-
             case BsonDataType.Array:{
                 Document doc = this.ReadDocument();
                 return ConvertToArray (doc);
