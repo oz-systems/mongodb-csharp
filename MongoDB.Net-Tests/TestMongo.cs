@@ -4,6 +4,7 @@ using System.Configuration;
 using NUnit.Framework;
 
 using MongoDB.Driver;
+using MongoDB.Driver.Connections;
     
 namespace MongoDB.Driver
 {
@@ -35,6 +36,24 @@ namespace MongoDB.Driver
                 thrown = true;
             }
             Assert.IsTrue(thrown, "MongoComException not thrown");
+        }
+
+        [Test()]
+        public void TestThatConnectionStateShowsClosedWithoutConnection() {
+            using (Mongo m = new Mongo(connectionString))
+            {
+                Assert.AreEqual(ConnectionState.Closed, m.ConnectionState);
+            }
+        }
+
+        [Test()]
+        public void TestThatConnectionStateShowsOpenedWithAConnection()
+        {
+            using (Mongo m = new Mongo(connectionString))
+            {
+                m.Connect();
+                Assert.AreEqual(ConnectionState.Opened, m.ConnectionState);
+            }
         }
     }
 }

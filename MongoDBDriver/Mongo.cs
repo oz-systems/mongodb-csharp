@@ -93,5 +93,12 @@ namespace MongoDB.Driver
         public void Dispose (){
             connection.Dispose ();
         }
+
+        public ConnectionState ConnectionState {
+            get
+            {
+                return connection.State;
+            }
+        }
     }
 }
