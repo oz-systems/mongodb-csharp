@@ -68,6 +68,9 @@ namespace MongoDB
                 if(Result == null || Result.Ok == false)
                     throw new InvalidOperationException("Documents cannot be iterated when an error was returned from execute.");
 
+				foreach (var doc in Result.Documents)
+					yield return doc;
+
                 var docs = _database.GetCollection<Document>(Result.CollectionName).FindAll().Documents;
                 using((IDisposable)docs)
                 {
@@ -82,7 +85,7 @@ namespace MongoDB
         /// </summary>
         public void Dispose()
         {
-            if(Command.KeepTemp || Command.Out != null || _disposing)
+            if(Command.KeepTemp || _disposing)
                 return;
 
             _disposing = true;
@@ -91,7 +94,8 @@ namespace MongoDB
                 return; //Nothing to do.
 
             //Drop the temporary collection that was created as part of results.
-            _database.Metadata.DropCollection(Result.CollectionName);
+			if (Result.CollectionName != null)
+				_database.Metadata.DropCollection(Result.CollectionName);
         }
 
         /// <summary>
@@ -186,6 +190,16 @@ namespace MongoDB
             Command.Out = name;
             return this;
         }
+
+		/// <summary>
+		///   Specifies how to handle the final collection of results
+		/// </summary>
+		public MapReduce Out(Document @out)
+		{
+			TryModify();
+			Command.OutCollection = @out;
+			return this;
+		}
 
         /// <summary>
         ///   When true the generated collection is not treated as temporary.  Specifying out automatically makes

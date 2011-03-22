@@ -16,6 +16,8 @@ namespace MongoDB.Commands
         internal MapReduceCommand(string name)
         {
             Command = new Document("mapreduce", name);
+			// By default, we will specify that output is handled in RAM to avoid re-query
+			OutCollection = new Document("inline", 1);
             Verbose = true;
         }
 
@@ -92,6 +94,15 @@ namespace MongoDB.Commands
             get { return (string)Command["out"]; }
             set { Command["out"] = value; }
         }
+
+		/// <summary>
+		///   Document that defines how to handle the results collection
+		/// </summary>
+		public Document OutCollection
+		{
+			get { return (Document)Command["out"]; }
+			set { Command["out"] = value; }
+		}
 
         /// <summary>
         ///   When true the generated collection is not treated as temporary.  Specifying out automatically makes

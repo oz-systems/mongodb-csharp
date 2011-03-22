@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace MongoDB.Results
 {
@@ -22,6 +24,19 @@ namespace MongoDB.Results
             _result = result;
             _counts = (Document)result["counts"];
         }
+
+		/// <summary>
+		///   Returns the collection of Documents in results
+		/// </summary>
+		public IEnumerable<Document> Documents
+		{
+			get
+			{
+				if (_result.ContainsKey("results"))
+					return (IEnumerable<Document>)_result["results"];
+				return Enumerable.Empty<Document>();
+			}
+		}
 
         /// <summary>
         ///   Gets the name of the collection.

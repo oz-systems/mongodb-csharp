@@ -10,7 +10,7 @@ namespace MongoDB.IntegrationTests.Connections
     [TestFixture]
     public class TestConnection
     {
-        protected void WriteBadMessage(Connection conn)
+        private void WriteBadMessage(Connection conn)
         {
             //Write a bad message to the socket to force mongo to shut down our connection.
             var writer = new BinaryWriter(conn.GetStream());
@@ -24,7 +24,7 @@ namespace MongoDB.IntegrationTests.Connections
             writer.Write((byte)0);
         }
 
-        protected QueryMessage GenerateQueryMessage()
+        private QueryMessage GenerateQueryMessage()
         {
             var qdoc = new Document {{"listDatabases", 1.0}};
             //QueryMessage qmsg = new QueryMessage(qdoc,"system.namespaces");
@@ -37,7 +37,7 @@ namespace MongoDB.IntegrationTests.Connections
 		[Test]
 		public void TestAutoRetryMessage()
 		{
-			var conn = ConnectionFactory.GetConnection(string.Empty);
+			var conn = ConnectionFactoryFactory.GetConnection(string.Empty);
 			conn.Open();
 
 			WriteBadMessage(conn);
@@ -56,7 +56,7 @@ namespace MongoDB.IntegrationTests.Connections
         public void TestSendQueryMessage()
         {
             //Connection conn = new Connection("10.141.153.2");
-            var conn = ConnectionFactory.GetConnection(string.Empty);
+			var conn = ConnectionFactoryFactory.GetConnection(string.Empty);
             conn.Open();
 
             var qmsg = GenerateQueryMessage();

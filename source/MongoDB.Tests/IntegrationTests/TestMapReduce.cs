@@ -104,7 +104,7 @@ namespace MongoDB.IntegrationTests
         public void TestExecuteUsing()
         {
             String tempcollname;
-            using(var mrb = _collection.MapReduce().Map(MapFunc).Reduce(ReduceFunc))
+            using(var mrb = _collection.MapReduce().Out("outtest").Map(MapFunc).Reduce(ReduceFunc))
             {
                 mrb.RetrieveData();
                 Assert.IsNotNull(mrb.Result);
@@ -122,5 +122,15 @@ namespace MongoDB.IntegrationTests
             Assert.IsNotNull(mr);
             Assert.AreEqual(_collection.Name, mr.Command.Name);
         }
+
+		[Test]
+		public void TestExecuteInMemoryByDefault()
+		{
+			var mrb = _collection.MapReduce();
+			var mr = mrb.Map(MapFunc).Reduce(ReduceFunc);
+
+			mr.RetrieveData();
+			Assert.IsNull(mr.Result.CollectionName);
+		}
     }
 }
