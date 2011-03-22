@@ -10,7 +10,7 @@ namespace MongoDB.IntegrationTests.Connections
     [TestFixture]
     public class TestConnection
     {
-        private void WriteBadMessage(Connection conn)
+        protected void WriteBadMessage(Connection conn)
         {
             //Write a bad message to the socket to force mongo to shut down our connection.
             var writer = new BinaryWriter(conn.GetStream());
@@ -24,7 +24,7 @@ namespace MongoDB.IntegrationTests.Connections
             writer.Write((byte)0);
         }
 
-        private QueryMessage GenerateQueryMessage()
+        protected QueryMessage GenerateQueryMessage()
         {
             var qdoc = new Document {{"listDatabases", 1.0}};
             //QueryMessage qmsg = new QueryMessage(qdoc,"system.namespaces");
@@ -34,33 +34,29 @@ namespace MongoDB.IntegrationTests.Connections
             };
         }
 
-        [Test]
-        public void TestReconnectOnce()
-        {
-            var conn = ConnectionFactoryFactory.GetConnection(string.Empty);
-            conn.Open();
+		[Test]
+		public void TestAutoRetryMessage()
+		{
+			var conn = ConnectionFactory.GetConnection(string.Empty);
+			conn.Open();
 
-            WriteBadMessage(conn);
+			WriteBadMessage(conn);
             try
-            {
-                var qmsg = GenerateQueryMessage();
-                conn.SendTwoWayMessage(qmsg,string.Empty);
-            }
-            catch(IOException)
-            {
-                //Should be able to resend.
-                Assert.IsTrue(conn.IsConnected);
-                var qmsg = GenerateQueryMessage();
-                var rmsg = conn.SendTwoWayMessage(qmsg, string.Empty);
-                Assert.IsNotNull(rmsg);
-            }
-        }
+			{
+				var qmsg = GenerateQueryMessage();
+				conn.SendTwoWayMessage(qmsg, string.Empty);
+			}
+			catch (IOException)
+			{
+				Assert.Fail("Should NOT get here");
+			}
+		}
 
         [Test]
         public void TestSendQueryMessage()
         {
             //Connection conn = new Connection("10.141.153.2");
-            var conn = ConnectionFactoryFactory.GetConnection(string.Empty);
+            var conn = ConnectionFactory.GetConnection(string.Empty);
             conn.Open();
 
             var qmsg = GenerateQueryMessage();

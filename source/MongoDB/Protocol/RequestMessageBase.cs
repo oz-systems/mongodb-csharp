@@ -27,22 +27,22 @@ namespace MongoDB.Protocol
         /// </summary>
         /// <param name="stream">The stream.</param>
         public void Write(Stream stream){
-            var header = Header;
             var bstream = new BufferedStream(stream);
             var writer = new BinaryWriter(bstream);
             var bwriter = new BsonWriter(bstream, _bsonWriterSettings);
 
-            Header.MessageLength += CalculateBodySize(bwriter);
-            if(Header.MessageLength > MaximumMessageSize)
+            var bodySize = Header.MessageLength + CalculateBodySize(bwriter);
+            if(bodySize > MaximumMessageSize)
                 throw new MongoException("Maximum message length exceeded");
 
-            writer.Write(header.MessageLength);
-            writer.Write(header.RequestId);
-            writer.Write(header.ResponseTo);
-            writer.Write((int)header.OpCode);
+            writer.Write(bodySize);
+            writer.Write(Header.RequestId);
+            writer.Write(Header.ResponseTo);
+            writer.Write((int)Header.OpCode);
             writer.Flush();
             WriteBody(bwriter);
             bwriter.Flush();
+			Header.MessageLength = bodySize;
         }
 
         /// <summary>
