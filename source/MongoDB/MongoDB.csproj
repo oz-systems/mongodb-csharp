@@ -150,6 +150,7 @@
     <Compile Include="Serialization\Builders\DictionaryBuilder.cs" />
     <Compile Include="Serialization\Builders\PropertyDescriptor.cs" />
     <Compile Include="Serialization\Descriptors\DictionaryPropertyDescriptor.cs" />
+    <Compile Include="Util\ReferenceEqualityComparer.cs" />
     <Compile Include="Util\ScopedDictionary.cs" />
     <Compile Include="Linq\Translators\AggregateChecker.cs" />
     <Compile Include="Linq\Translators\AggregateRewriter.cs" />

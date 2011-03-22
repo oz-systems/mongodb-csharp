@@ -19,6 +19,9 @@ namespace MongoDB
 		private readonly Dictionary<string, object> _dictionary;
 		private readonly IComparer<string> _keyComparer;
 
+		[ThreadStatic]
+		private static Dictionary<object, int> _visited;
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Document"/> class.
 		/// </summary>
@@ -589,6 +592,8 @@ namespace MongoDB
 		{
 			if (document == null)
 				return false;
+			if (ReferenceEquals(this, document))
+				return true;
 			if (_orderedKeys.Count != document._orderedKeys.Count)
 				return false;
 			return GetHashCode() == document.GetHashCode();
@@ -603,16 +608,29 @@ namespace MongoDB
 		public override int GetHashCode()
 		{
 			var hash = 27;
-			foreach (var key in _orderedKeys)
+			var visited = _visited;
+			try
 			{
-				var valueHashCode = GetValueHashCode(this[key]);
-				unchecked
+				if (visited == null)
 				{
-					hash = (13 * hash) + key.GetHashCode();
-					hash = (13 * hash) + valueHashCode;
+					_visited = new Dictionary<object, int>(ReferenceEqualityComparer<object>.Instance);
 				}
+				foreach (var key in _orderedKeys)
+				{
+					var valueHashCode = GetValueHashCode(this[key]);
+					unchecked
+					{
+						hash = (13 * hash) + key.GetHashCode();
+						hash = (13 * hash) + valueHashCode;
+					}
+				}
+				return hash;
 			}
-			return hash;
+			finally
+			{
+				if (visited == null)
+					_visited = null;
+			}
 		}
 
 		/// <summary>
@@ -624,46 +642,67 @@ namespace MongoDB
 		{
 			if (value == null)
 				return 0;
-			if (value is ICollection && (value is Document) == false && (value is String) == false && (value is DBRef) == false)
-				return GetArrayHashcode((ICollection)value);
-			return value.GetHashCode();
+
+			int hash;
+			var visited = _visited;
+			if (visited.TryGetValue(value, out hash))
+				return hash;
+
+			visited.Add(value, 0);
+
+			if (value is IEnumerable
+				&& (value is Document) == false
+				&& (value is String) == false)
+			{
+				return GetEnumerableHashcode((IEnumerable)value);
+			}
+
+			hash = value.GetHashCode();
+			visited[value] = hash;
+			return hash;
 		}
 
-        /// <summary>
-        /// Gets the array hashcode.
-        /// </summary>
-        /// <param name="array">The array.</param>
-        /// <returns></returns>
-        private int GetArrayHashcode(Array array){
-            var hash = 0;
-            foreach(var value in array){
-                var valueHashCode = GetValueHashCode(value);
-                unchecked{
-                    hash = (13*hash) + valueHashCode;
-                }
-            }
-            return hash;
-        }
-        
-        /// <summary>
-        /// Returns an enumerator that iterates through a collection.
-        /// </summary>
-        /// <returns>
-        /// An <see cref="T:System.Collections.IEnumerator"/> object that can be used to iterate through the collection.
-        /// </returns>
-        IEnumerator IEnumerable.GetEnumerator(){
-            return GetEnumerator();
-        }
-        
-        /// <summary>
-        /// Returns an enumerator that iterates through the collection.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="T:System.Collections.Generic.IEnumerator`1"/> that can be used to iterate through the collection.
-        /// </returns>
-        public IEnumerator<KeyValuePair<string, object>> GetEnumerator(){
-            return _orderedKeys.Select(orderedKey => new KeyValuePair<string, object>(orderedKey, _dictionary[orderedKey])).GetEnumerator();
-        }
+		/// <summary>
+		/// Gets the enumerable hashcode.
+		/// </summary>
+		/// <param name="enumerable">The enumerable.</param>
+		/// <returns></returns>
+		private int GetEnumerableHashcode(IEnumerable enumerable)
+		{
+			var hash = 0;
+
+			foreach (var value in enumerable)
+			{
+				var valueHashCode = GetValueHashCode(value);
+				unchecked
+				{
+					hash = (13 * hash) + valueHashCode;
+				}
+			}
+			return hash;
+		}
+
+		/// <summary>
+		/// Returns an enumerator that iterates through a collection.
+		/// </summary>
+		/// <returns>
+		/// An <see cref="T:System.Collections.IEnumerator"/> object that can be used to iterate through the collection.
+		/// </returns>
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
+		}
+
+		/// <summary>
+		/// Returns an enumerator that iterates through the collection.
+		/// </summary>
+		/// <returns>
+		/// A <see cref="T:System.Collections.Generic.IEnumerator`1"/> that can be used to iterate through the collection.
+		/// </returns>
+		public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
+		{
+			return _orderedKeys.Select(orderedKey => new KeyValuePair<string, object>(orderedKey, _dictionary[orderedKey])).GetEnumerator();
+		}
 
 		/// <summary>
 		/// Toes the dictionary.

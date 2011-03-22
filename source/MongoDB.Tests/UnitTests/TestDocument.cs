@@ -206,7 +206,7 @@ namespace MongoDB.UnitTests
         [Test]
         public void TestTwoDocumentsWithDifferentDocumentChildTreeAreNotEqual()
         {
-            var d1 = new Document().Add("k1", new Document().Add("k2", new Document().Add("k3", "foo")));
+            var d1 = new Document().Add("1k1", new Document().Add("k2", new Document().Add("k3", "foo")));
             var d2 = new Document().Add("k1", new Document().Add("k2", new Document().Add("k3", "bar")));
             AreNotEqual(d1, d2);
         }
