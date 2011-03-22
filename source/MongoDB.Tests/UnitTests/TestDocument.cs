@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Xml.Serialization;
 using NUnit.Framework;
+using MongoDB.Util;
 
 namespace MongoDB.UnitTests
 {
@@ -209,6 +210,67 @@ namespace MongoDB.UnitTests
             var d2 = new Document().Add("k1", new Document().Add("k2", new Document().Add("k3", "bar")));
             AreNotEqual(d1, d2);
         }
+
+		[Test]
+		public void TestTwoDocumentsWithListPropertiesAreEqual()
+		{
+			var d1 = new Document().Add("k1", new List<Document> { new Document().Add("k2", "Foo") });
+			var d2 = new Document().Add("k1", new List<Document> { new Document().Add("k2", "Foo") });
+			AreEqual(d1, d2);
+		}
+
+		[Test]
+		public void TestTwoDocumentsWithEnumerablePropertiesAreEqual()
+		{
+			var d1 = new Document().Add("k1", new []{ new Document().Add("k2", "Foo") });
+			var d2 = new Document().Add("k1", new []{ new Document().Add("k2", "Foo") });
+			AreEqual(d1, d2);
+		}
+
+		[Test]
+		public void TestTwoDocumentsWithDBRefAreEqual()
+		{
+			var starWars = new[] 
+			{ 
+				"Star Wars Episode IV: A New Hope",
+				"Star Wars Episode V: The Empire Strikes Back",
+				"Star Wars Episode VI: Return of the Jedi",
+				"Star Wars Episode I: The Phantom Menace",
+				"Star Wars Episode II: Attack of the Clones",
+				"Star Wars Episode III: Revenge of the Sith",
+				"Star Wars: The Clone Wars"
+			};
+
+			var books = starWars.Select((title, i) =>
+			{
+				return new Document()
+					.Add("Title", title)
+					.Add("_id", new Document().Add("Category", 8).Add("SubCategory", 1).Add("SubDivision", i)
+					);
+			}).ToList();
+
+			var bookDocs = starWars.Select((title, i) =>
+			{
+				return new Document()
+					.Add("_id", new Document()
+						.Add("Category", 8).Add("SubCategory", 1)
+						.Add("SubDivision", i))
+					.Add("Title", title);
+			}).ToList();
+
+			foreach (var book in books)
+			{
+				book.Add("RelatedBooks", books.Except(Enumerable.Repeat(book, 1)));
+			}
+
+			foreach (var bookDoc in bookDocs)
+			{
+				bookDoc.Add("RelatedBooks", bookDocs.Except(Enumerable.Repeat(bookDoc, 1))
+					.Select(doc => new DBRef("Default", doc["_id"])));
+			}
+
+			AreNotEqual(bookDocs[0], bookDocs[1]);
+		}
 
         [Test]
         public void TestTwoDocumentsWithMisorderedArrayContentAreNotEqual()
