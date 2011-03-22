@@ -607,14 +607,23 @@ namespace MongoDB
 		/// </returns>
 		public override int GetHashCode()
 		{
-			var hash = 27;
+			int hash;
+			var clear = false;
 			var visited = _visited;
 			try
 			{
 				if (visited == null)
 				{
-					_visited = new Dictionary<object, int>(ReferenceEqualityComparer<object>.Instance);
+					_visited = visited = new Dictionary<object, int>(ReferenceEqualityComparer<object>.Instance);
+					clear = true;
 				}
+				else
+				{
+					if (visited.TryGetValue(this, out hash))
+						return hash;
+					visited.Add(this, 0);
+				}
+				hash = 27;
 				foreach (var key in _orderedKeys)
 				{
 					var valueHashCode = GetValueHashCode(this[key]);
@@ -624,11 +633,12 @@ namespace MongoDB
 						hash = (13 * hash) + valueHashCode;
 					}
 				}
+				visited[this] = hash;
 				return hash;
 			}
 			finally
 			{
-				if (visited == null)
+				if (clear)
 					_visited = null;
 			}
 		}
@@ -643,23 +653,18 @@ namespace MongoDB
 			if (value == null)
 				return 0;
 
-			int hash;
-			var visited = _visited;
-			if (visited.TryGetValue(value, out hash))
-				return hash;
-
-			visited.Add(value, 0);
-
-			if (value is IEnumerable
+			if ((value is IEnumerable)
 				&& (value is Document) == false
 				&& (value is String) == false)
 			{
 				return GetEnumerableHashcode((IEnumerable)value);
 			}
+			else if (value is DateTime)
+			{
+				return ((DateTime)value).ToUniversalTime().GetHashCode();
+			}
 
-			hash = value.GetHashCode();
-			visited[value] = hash;
-			return hash;
+			return value.GetHashCode();
 		}
 
 		/// <summary>

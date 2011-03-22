@@ -139,14 +139,7 @@ namespace MongoDB
         /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
         /// </returns>
         public override int GetHashCode(){
-            unchecked
-            {
-                var result = (_document != null ? _document.GetHashCode() : 0);
-                result = (result*397) ^ (_collectionName != null ? _collectionName.GetHashCode() : 0);
-                result = (result*397) ^ (_id != null ? _id.GetHashCode() : 0);
-                result = (result*397) ^ (_metadata != null ? _metadata.GetHashCode() : 0);
-                return result;
-            }
+			return _document.GetHashCode();
         }
 
         /// <summary>
@@ -199,7 +192,7 @@ namespace MongoDB
                 return false;
             if(ReferenceEquals(this, other))
                 return true;
-            return Equals(other._document, _document) && Equals(other._collectionName, _collectionName) && Equals(other._id, _id) && Equals(other._metadata, _metadata);
+			return Equals(other._document, _document);
         }
 
         /// <summary>
