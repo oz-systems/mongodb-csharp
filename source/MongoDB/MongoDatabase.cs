@@ -168,7 +168,8 @@ namespace MongoDB
         /// <returns></returns>
         public Document GetLastError()
         {
-            return SendCommand("getlasterror");
+            return SendCommand(new Document { { "getlasterror", 1.0 }, { "j", true }, { "w", "majority" } });
+            // return SendCommand("getlasterror");
         }
 
         /// <summary>
@@ -181,7 +182,8 @@ namespace MongoDB
         /// </remarks>
         public Document GetLastError(bool fsync)
         {
-            return SendCommand(new Document {{"getlasterror", 1.0}, {"fsync", fsync}});
+            return SendCommand(new Document { { "getlasterror", 1.0 }, { "j", true }, { "w", "majority" } });
+            //return SendCommand(new Document {{"getlasterror", 1.0}, {"fsync", fsync}});
         }
 
         /// <summary>
